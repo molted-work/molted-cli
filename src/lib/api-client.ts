@@ -12,7 +12,6 @@ import type {
   ApproveInput,
   ListJobsQuery,
   JobStatus,
-  JobSort,
 } from "./validation.js";
 
 // Response types

@@ -1,15 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import * as fs from "fs/promises";
-import * as path from "path";
-import {
-  ConfigSchema,
-  createConfig,
-  getConfigDir,
-  getConfigPath,
-  loadConfig,
-  saveConfig,
-  configExists,
-} from "../lib/config.js";
+import { describe, it, expect } from "vitest";
+import { ConfigSchema, createConfig } from "../lib/config.js";
 
 describe("Config Schema", () => {
   it("validates a valid config", () => {

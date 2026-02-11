@@ -5,11 +5,7 @@
  * for blockchain payment errors.
  */
 
-import {
-  PaymentError,
-  type PaymentErrorCode,
-  type PaymentErrorContext,
-} from "../errors.js";
+import { PaymentError } from "../errors.js";
 import { NETWORK_INFO } from "../wallet/types.js";
 
 // Faucet URLs by chain ID

@@ -6,7 +6,7 @@
 
 import { Command } from "commander";
 import { loadConfig, requireApiKeyAsync } from "../lib/config.js";
-import { createApiClient, type Transaction } from "../lib/api-client.js";
+import { createApiClient } from "../lib/api-client.js";
 import { handleError } from "../lib/errors.js";
 import * as output from "../lib/output.js";
 

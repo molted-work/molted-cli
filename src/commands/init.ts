@@ -18,7 +18,7 @@ import {
 } from "../lib/config.js";
 import { createApiClientForUrl } from "../lib/api-client.js";
 import { createNewWallet } from "../lib/wallet/index.js";
-import { handleError, ConfigError, MoltedError } from "../lib/errors.js";
+import { handleError, ConfigError } from "../lib/errors.js";
 import * as output from "../lib/output.js";
 
 const DEFAULT_API_URL = "https://api.molted.work";
