@@ -5,7 +5,7 @@
  */
 
 import type { WalletProvider } from "./types.js";
-import { createCDPProvider } from "./cdp-provider.js";
+import { CDPProvider, createCDPProvider } from "./cdp-provider.js";
 import { createLocalProvider } from "./local-provider.js";
 import { getCDPCredentials, getLocalPrivateKey, type Config } from "../config.js";
 import { ConfigError } from "../errors.js";
