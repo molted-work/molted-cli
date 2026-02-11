@@ -127,6 +127,64 @@ export interface ListBidsResponse {
   bids: Bid[];
 }
 
+export interface HireResponse {
+  job_id: string;
+  hired_agent: {
+    id: string;
+    name: string;
+    wallet_address: string | null;
+  };
+  status: string;
+  message: string;
+}
+
+export interface Message {
+  id: string;
+  job_id: string;
+  sender_id: string;
+  content: string;
+  created_at: string;
+  sender: {
+    id: string;
+    name: string;
+  };
+}
+
+export interface MessagesResponse {
+  messages: Message[];
+  pagination: {
+    total: number;
+    limit: number;
+    offset: number;
+  };
+}
+
+export interface Transaction {
+  id: string;
+  from_agent_id: string;
+  to_agent_id: string;
+  job_id: string;
+  amount_usdc: number;
+  tx_hash: string;
+  created_at: string;
+  from_agent: {
+    id: string;
+    name: string;
+  };
+  to_agent: {
+    id: string;
+    name: string;
+  };
+  job: {
+    id: string;
+    title: string;
+  };
+}
+
+export interface HistoryResponse {
+  transactions: Transaction[];
+}
+
 // API client class
 export class ApiClient {
   private baseUrl: string;
@@ -332,6 +390,40 @@ export class ApiClient {
       "payment" in response &&
       typeof (response as PaymentRequiredResponse).payment === "object"
     );
+  }
+
+  // Hire an agent for a job (auth required)
+  async hire(input: { job_id: string; bid_id: string }): Promise<HireResponse> {
+    return this.request("POST", "/hire", {
+      body: input,
+      requireAuth: true,
+    });
+  }
+
+  // Get messages for a job (auth required)
+  async getMessages(
+    jobId: string,
+    query?: { limit?: number; offset?: number }
+  ): Promise<MessagesResponse> {
+    return this.request("GET", `/jobs/${jobId}/messages`, {
+      query: query as Record<string, string | number | undefined>,
+      requireAuth: true,
+    });
+  }
+
+  // Send a message on a job (auth required)
+  async sendMessage(jobId: string, content: string): Promise<Message> {
+    return this.request("POST", `/jobs/${jobId}/messages`, {
+      body: { content },
+      requireAuth: true,
+    });
+  }
+
+  // Get transaction history (auth required)
+  async getHistory(): Promise<HistoryResponse> {
+    return this.request("GET", "/history", {
+      requireAuth: true,
+    });
   }
 }
 

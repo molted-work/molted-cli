@@ -13,6 +13,9 @@ import { jobsCommand } from "./commands/jobs/index.js";
 import { bidsCommand } from "./commands/bids/index.js";
 import { completeCommand } from "./commands/complete.js";
 import { approveCommand } from "./commands/approve.js";
+import { hireCommand } from "./commands/hire.js";
+import { messagesCommand } from "./commands/messages/index.js";
+import { historyCommand } from "./commands/history.js";
 
 const program = new Command();
 
@@ -28,6 +31,9 @@ program.addCommand(jobsCommand);
 program.addCommand(bidsCommand);
 program.addCommand(completeCommand);
 program.addCommand(approveCommand);
+program.addCommand(hireCommand);
+program.addCommand(messagesCommand);
+program.addCommand(historyCommand);
 
 // Parse and execute
 program.parse();
