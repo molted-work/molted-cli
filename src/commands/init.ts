@@ -8,6 +8,7 @@ import { Command } from "commander";
 import * as readline from "readline";
 import { promises as fs } from "fs";
 import path from "path";
+import { privateKeyToAccount } from "viem/accounts";
 import {
   configExists,
   saveConfig,
@@ -79,6 +80,7 @@ export const initCommand = new Command("init")
   .option("--name <name>", "Agent name")
   .option("--description <desc>", "Agent description")
   .option("--wallet-provider <provider>", "Wallet provider (cdp or local)", "cdp")
+  .option("--private-key <hex>", "Use existing wallet private key (0x-prefixed hex)")
   .option("--base-url <url>", "API base URL", DEFAULT_API_URL)
   .option("--network <network>", "Network (base or base-sepolia)", DEFAULT_NETWORK)
   .option("--json", "Output as JSON (includes full API key)")
@@ -143,20 +145,46 @@ export const initCommand = new Command("init")
       output.header("Initializing Molted Agent");
       console.log();
 
-      // Create wallet
-      const walletSpinner = output.spinner("Creating wallet...");
-      walletSpinner.start();
-
-      let wallet;
+      // Create or import wallet
+      let wallet: { address: string; type: string };
       let walletId: string | undefined;
-      try {
-        const result = await createNewWallet(walletProvider, network);
-        wallet = result.provider;
-        walletId = result.walletId;
-        walletSpinner.succeed(`Wallet created: ${output.truncateAddress(wallet.address)}`);
-      } catch (error) {
-        walletSpinner.fail("Failed to create wallet");
-        throw error;
+      let effectiveWalletProvider = walletProvider;
+
+      if (options.privateKey) {
+        // Import existing wallet from private key
+        const privateKey = options.privateKey as `0x${string}`;
+
+        // Validate private key format
+        if (!/^0x[a-fA-F0-9]{64}$/.test(privateKey)) {
+          throw new ConfigError("Invalid private key format. Must be 0x-prefixed 64 hex characters.");
+        }
+
+        const walletSpinner = output.spinner("Importing wallet...");
+        walletSpinner.start();
+
+        try {
+          const account = privateKeyToAccount(privateKey);
+          wallet = { address: account.address, type: "local" };
+          effectiveWalletProvider = "local";
+          walletSpinner.succeed(`Wallet imported: ${output.truncateAddress(account.address)}`);
+        } catch (error) {
+          walletSpinner.fail("Failed to import wallet");
+          throw error;
+        }
+      } else {
+        // Create new wallet
+        const walletSpinner = output.spinner("Creating wallet...");
+        walletSpinner.start();
+
+        try {
+          const result = await createNewWallet(walletProvider, network);
+          wallet = { address: result.provider.address, type: walletProvider };
+          walletId = result.walletId;
+          walletSpinner.succeed(`Wallet created: ${output.truncateAddress(wallet.address)}`);
+        } catch (error) {
+          walletSpinner.fail("Failed to create wallet");
+          throw error;
+        }
       }
 
       // Register agent
@@ -187,7 +215,7 @@ export const initCommand = new Command("init")
           agentId: registerResponse.agent_id,
           agentName: registerResponse.name,
           apiKeyPrefix: registerResponse.api_key_prefix,
-          walletType: walletProvider,
+          walletType: effectiveWalletProvider,
           walletAddress: wallet.address,
           walletId,
           network,
@@ -227,7 +255,7 @@ export const initCommand = new Command("init")
           api_key: registerResponse.api_key,
           api_key_prefix: registerResponse.api_key_prefix,
           wallet_address: wallet.address,
-          wallet_type: walletProvider,
+          wallet_type: effectiveWalletProvider,
           network,
           config_path: ".molted/config.json",
           credentials_path: ".molted/credentials.json",
